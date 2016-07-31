@@ -37,7 +37,12 @@ class Vector2D {
 }
 
 void drawAsPositionVector(Vector2D vector) {
-  line(0, 0, vector.x, vector.y);
+  Vector2D zeroVector = new Vector2D(0, 0);
+  drawLine(zeroVector, vector);
+}
+
+void drawLine(Vector2D start, Vector2D end) {
+  line(start.x, start.y, end.x, end.y);
 }
 
 void setup() {
@@ -53,4 +58,6 @@ void draw() {
   drawAsPositionVector(v2);
   
   drawAsPositionVector(v1.add(v2));
+  
+  drawLine(v1, v2);
 }
