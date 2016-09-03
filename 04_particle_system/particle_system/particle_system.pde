@@ -1,19 +1,28 @@
 import java.util.*;
 
-ParticleSystem ps;
+ArrayList<ParticleSystem> particleSystems;
 PVector startPos;
 
 void setup() {
   size(1024, 786);
   
   startPos = new PVector(width / 2, height / 4);
-  ps = new ParticleSystem(startPos);
+  particleSystems = new ArrayList<ParticleSystem>();
 }
 
 void draw() {
   background(0);
   
-  ps.run();
+  Iterator<ParticleSystem> psIterator = particleSystems.iterator();
+  while (psIterator.hasNext()) {
+    ParticleSystem currentSystem = psIterator.next();
+    currentSystem.run();
+  }
+}
+
+void mousePressed() {
+  ParticleSystem newPs = new ParticleSystem(new PVector(mouseX, mouseY));
+  particleSystems.add(newPs);
 }
 
 int MAX_SIZE = 1000;
