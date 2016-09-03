@@ -2,12 +2,15 @@ import java.util.*;
 
 ArrayList<ParticleSystem> particleSystems;
 PVector startPos;
+int particleType;
+final int MAX_SIZE = 1000;
 
 void setup() {
   size(1024, 786);
   
   startPos = new PVector(width / 2, height / 4);
   particleSystems = new ArrayList<ParticleSystem>();
+  particleType = ParticleSystem.TYPE_CIRCLE;
 }
 
 void draw() {
@@ -23,16 +26,22 @@ void draw() {
 void mousePressed() {
   ParticleSystem newPs = new ParticleSystem(new PVector(mouseX, mouseY));
   particleSystems.add(newPs);
+  particleType = (particleType + 1) % 3;
 }
 
-int MAX_SIZE = 1000;
 class ParticleSystem {
+  private final static int TYPE_CIRCLE = 0;
+  private final static int TYPE_SQUARE = 1;
+  private final static int TYPE_TRIANGLE = 2;
+
   ArrayList<Particle> particles;
   PVector origin;
+  int type = 0;
   
   ParticleSystem(PVector pos) {
     origin = pos;
     particles = new ArrayList<Particle>();
+    type = particleType;
   }
   
   void add(Particle p) {
@@ -45,7 +54,15 @@ class ParticleSystem {
   
   void run() {
     if (isFull()) {
-      particles.add(new Particle(origin));
+      Particle p = null;
+      if (type == TYPE_SQUARE) {
+        p = new SquareParticle(origin);
+      } else if (type == TYPE_TRIANGLE) {
+        p = new TriangleParticle(origin);
+      } else { /* TYPE_CIRCLE or else */
+        p = new CircleParticle(origin);
+      }
+      particles.add(p);
     }
       
     Iterator<Particle> ip = particles.iterator();
@@ -61,7 +78,7 @@ class ParticleSystem {
   }
 }
 
-class Particle {
+abstract class Particle {
   PVector pos;
   PVector velo;
   PVector accel;
@@ -90,5 +107,35 @@ class Particle {
   
   boolean isAlive() {
     return lifetime > 0 ? true : false;
+  }
+}
+
+class SquareParticle extends Particle {
+  SquareParticle(PVector pos) {
+    super(pos);
+  }
+  
+  void display() {
+    rectMode(CENTER);
+    fill(200, lifetime);
+    rect(pos.x, pos.y, 8, 8); 
+  }
+}
+
+class TriangleParticle extends Particle {
+  TriangleParticle(PVector pos) {
+    super(pos);
+  }
+  
+  void display() {
+    rectMode(CENTER);
+    fill(200, lifetime);
+    triangle(pos.x, pos.y, pos.x + 4, pos.y - 8, pos.x + 8, pos.y);     
+  }
+}
+
+class CircleParticle extends Particle {
+  CircleParticle(PVector pos) {
+    super(pos);
   }
 }
