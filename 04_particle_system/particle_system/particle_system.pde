@@ -1,21 +1,54 @@
-Particle p;
+import java.util.*;
+
+ParticleSystem ps;
 PVector startPos;
 
 void setup() {
   size(1024, 786);
   
   startPos = new PVector(width / 2, height / 4);
-  p = new Particle(startPos);
+  ps = new ParticleSystem(startPos);
 }
 
 void draw() {
   background(0);
   
-  p.update();
-  if (p != null && p.isAlive()) {
-    p.display();
-  } else {
-    p = new Particle(startPos);
+  ps.run();
+}
+
+int MAX_SIZE = 1000;
+class ParticleSystem {
+  ArrayList<Particle> particles;
+  PVector origin;
+  
+  ParticleSystem(PVector pos) {
+    origin = pos;
+    particles = new ArrayList<Particle>();
+  }
+  
+  void add(Particle p) {
+    particles.add(p);
+  }
+  
+  private boolean isFull() {
+    return particles.size() < MAX_SIZE;
+  }
+  
+  void run() {
+    if (isFull()) {
+      particles.add(new Particle(origin));
+    }
+      
+    Iterator<Particle> ip = particles.iterator();
+    while (ip.hasNext()) {
+      Particle p = ip.next();
+      p.update();
+      if (p != null && p.isAlive()) {
+        p.display();
+      } else {
+        ip.remove();
+      }
+    }
   }
 }
 
