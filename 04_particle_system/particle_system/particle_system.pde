@@ -4,10 +4,10 @@ PVector startPos;
 void setup() {
   size(1024, 786);
   
-  startPos = new PVector(width / 2, height / 2);
+  startPos = new PVector(width / 2, height / 4);
   p = new Particle(startPos);
 }
-int i = 0;
+
 void draw() {
   background(0);
   
@@ -28,7 +28,7 @@ class Particle {
   
   Particle(PVector pos) {
     this.pos = new PVector(pos.x, pos.y);
-    this.velo = new PVector(random(-1, 1), random(-2, 0));
+    this.velo = new PVector(random(-5, 5), random(-10, 0));
     this.accel = new PVector(0, 0.98);
     this.lifetime = 255;
   }
@@ -37,7 +37,7 @@ class Particle {
     velo.add(accel);
     pos.add(velo);
     
-    lifetime -= 2.0;
+    lifetime -= 8.0;
   }
   
   void display() {
