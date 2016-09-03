@@ -100,9 +100,7 @@ abstract class Particle {
   }
   
   void display() {
-    stroke(0, lifetime);
-    fill(200, lifetime);
-    ellipse(pos.x, pos.y, 7, 7);
+    // TO-BE-IMPLEMENTED
   }
   
   boolean isAlive() {
@@ -149,5 +147,11 @@ class TriangleParticle extends Particle {
 class CircleParticle extends Particle {
   CircleParticle(PVector pos) {
     super(pos);
+  }
+  
+  void display() {
+    stroke(0, lifetime);
+    fill(200, lifetime);
+    ellipse(pos.x, pos.y, 7, 7);
   }
 }
