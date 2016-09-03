@@ -116,9 +116,15 @@ class SquareParticle extends Particle {
   }
   
   void display() {
+    float theta = map(pos.x, 0, width, 0, TWO_PI * 2);
+    
     rectMode(CENTER);
     fill(200, lifetime);
-    rect(pos.x, pos.y, 8, 8); 
+    pushMatrix();
+    translate(pos.x, pos.y);
+    rotate(theta);
+    rect(0, 0, 8, 8);
+    popMatrix(); 
   }
 }
 
@@ -128,8 +134,15 @@ class TriangleParticle extends Particle {
   }
   
   void display() {
+    float theta = map(pos.x, 0, width, 0, TWO_PI);
+    
     fill(200, lifetime);
-    triangle(pos.x, pos.y, pos.x + 4, pos.y - 8, pos.x + 8, pos.y);     
+    
+    pushMatrix();
+    translate(pos.x, pos.y);
+    rotate(theta);
+    triangle(0, 0, 4, -sqrt(48), 8, 0);
+    popMatrix();
   }
 }
 
