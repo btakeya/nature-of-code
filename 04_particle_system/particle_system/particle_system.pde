@@ -128,7 +128,6 @@ class TriangleParticle extends Particle {
   }
   
   void display() {
-    rectMode(CENTER);
     fill(200, lifetime);
     triangle(pos.x, pos.y, pos.x + 4, pos.y - 8, pos.x + 8, pos.y);     
   }
