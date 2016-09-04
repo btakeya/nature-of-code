@@ -86,7 +86,7 @@ abstract class Particle {
   float lifetime;
   
   Particle(PVector pos) {
-    this.pos = new PVector(pos.x, pos.y);
+    this.pos = pos.copy();
     this.velo = new PVector(random(-5, 5), random(-10, 0));
     this.accel = new PVector(0, 0.98);
     this.lifetime = 255;
