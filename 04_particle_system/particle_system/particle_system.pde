@@ -26,7 +26,7 @@ void draw() {
 void mousePressed() {
   ParticleSystem newPs = new ParticleSystem(new PVector(mouseX, mouseY));
   particleSystems.add(newPs);
-  particleType = (particleType + 1) % 3;
+  particleType = (particleType + 1) % 4;
 }
 
 class ParticleSystem {
@@ -59,8 +59,19 @@ class ParticleSystem {
         p = new SquareParticle(origin);
       } else if (type == TYPE_TRIANGLE) {
         p = new TriangleParticle(origin);
-      } else { /* TYPE_CIRCLE or else */
+      } else if (type == TYPE_CIRCLE) {
         p = new CircleParticle(origin);
+      } else { // TYPE_MIXED
+        float possiblity = random(3);
+        if (possiblity < 1) {
+          p = new SquareParticle(origin);
+        } else if (possiblity < 2) {
+          p = new TriangleParticle(origin);
+        } else if (possiblity < 3) {
+          p = new CircleParticle(origin);
+        } else {
+          /* will not happen */
+        }
       }
       particles.add(p);
     }
