@@ -48,8 +48,14 @@ class Vehicle {
   
   void seek(PVector target) {
     PVector desired = PVector.sub(target, position);
+    float distance = desired.mag();
+    float adjustedSpeed = speedLimit;
+    
+    if (distance <= 5) adjustedSpeed = 0; /* Arrived */
+    else if (distance <= 100) adjustedSpeed *= (distance / 100); /* Around target */
+    
     desired.normalize();
-    desired.mult(speedLimit);
+    desired.mult(adjustedSpeed);
     
     PVector steer = PVector.sub(desired, velocity);
     steer.limit(forceLimit);
