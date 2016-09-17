@@ -7,8 +7,18 @@ void setup() {
 Vehicle v;  
 PVector moveX;
 
+float marginX = 50;
+float marginY = 50;
+
 void draw() {
   background(255);
+  
+  /* Margin */
+  line(0, marginY, width, marginY);
+  line(0, height - marginY, width, height - marginY);
+  line(marginX, 0, marginX, height);
+  line(width - marginX, 0, width - marginX, height);
+  
   v.seek(new PVector(mouseX, mouseY));
   v.update();
   v.display();
@@ -36,10 +46,39 @@ class Vehicle {
   }
   
   void update() {
+    avoidWall();
     velocity.add(acceleration);
     velocity.limit(speedLimit);
+    
+    avoidWall();
     position.add(velocity);
     acceleration.mult(0);
+  }
+  
+  void avoidWall() {
+    if (position.x < marginX) {
+      PVector desired = new PVector(speedLimit, velocity.y);
+      PVector steer = PVector.sub(desired, velocity);
+      steer.limit(forceLimit);
+      applyForce(steer);
+    } else if (position.x > width - marginX) {
+      PVector desired = new PVector(-speedLimit, velocity.y);
+      PVector steer = PVector.sub(desired, velocity);
+      steer.limit(forceLimit);
+      applyForce(steer);
+    }
+    
+    if (position.y < marginY) {
+      PVector desired = new PVector(velocity.x, speedLimit);
+      PVector steer = PVector.sub(desired, velocity);
+      steer.limit(forceLimit);
+      applyForce(steer);
+    } else if (position.y > height - marginY) {
+      PVector desired = new PVector(velocity.x, -speedLimit);
+      PVector steer = PVector.sub(desired, velocity);
+      steer.limit(forceLimit);
+      applyForce(steer);
+    }
   }
   
   void applyForce(PVector force) {
