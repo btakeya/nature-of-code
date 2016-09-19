@@ -1,14 +1,24 @@
 void setup() {
   size(800, 600);
   background(255);
-  v = new Vehicle(width/2.0, height/2.0);
+  
+  id = 0;
+  vehicles = new ArrayList<Vehicle>();
 }
 
-Vehicle v;  
+int id;
+
+ArrayList<Vehicle> vehicles;  
 PVector moveX;
 
 float marginX = 50;
 float marginY = 50;
+
+void mouseReleased() {
+  Vehicle v = new Vehicle(mouseX, mouseY, id);
+  vehicles.add(v);
+  id += 1;
+}
 
 void draw() {
   background(255);
@@ -19,9 +29,11 @@ void draw() {
   line(marginX, 0, marginX, height);
   line(width - marginX, 0, width - marginX, height);
   
-  v.seek(new PVector(mouseX, mouseY));
-  v.update();
-  v.display();
+  for (Vehicle v : vehicles) {
+    v.seek(new PVector(mouseX, mouseY));
+    v.update();
+    v.display();
+  }
 }
 
 class Vehicle {
@@ -34,7 +46,9 @@ class Vehicle {
   float forceLimit;
   float speedLimit;
   
-  Vehicle(float x, float y) {
+  int _id;
+  
+  Vehicle(float x, float y, int id) {
     position = new PVector(x, y);
     velocity = new PVector(0, 0); 
     acceleration = new PVector(0, 0);
@@ -43,6 +57,12 @@ class Vehicle {
     
     forceLimit = 0.1;
     speedLimit = 5.0;
+    
+    _id = id;
+  }
+  
+  int getId() {
+    return _id;
   }
   
   void update() {
@@ -50,7 +70,6 @@ class Vehicle {
     velocity.add(acceleration);
     velocity.limit(speedLimit);
     
-    avoidWall();
     position.add(velocity);
     acceleration.mult(0);
   }
@@ -115,5 +134,11 @@ class Vehicle {
     vertex(size, size * 2);
     endShape(CLOSE);
     popMatrix();
+  }
+  
+  boolean equals(Vehicle other) {
+    boolean isSameHashCode = this.hashCode() == other.hashCode();
+    boolean isSameId = this.getId() == other.getId();
+    return isSameHashCode && isSameId;
   }
 }
