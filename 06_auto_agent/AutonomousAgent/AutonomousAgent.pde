@@ -4,9 +4,12 @@ void setup() {
   
   id = 0;
   vehicles = new ArrayList<Vehicle>();
+  field = new FlowField(10);
 }
 
 int id;
+
+FlowField field;
 
 ArrayList<Vehicle> vehicles;  
 PVector moveX;
@@ -20,6 +23,8 @@ void mouseReleased() {
   id += 1;
 }
 
+import java.util.*;
+
 void draw() {
   background(255);
   
@@ -29,10 +34,18 @@ void draw() {
   line(marginX, 0, marginX, height);
   line(width - marginX, 0, width - marginX, height);
   
-  for (Vehicle v : vehicles) {
-    v.seek(new PVector(mouseX, mouseY));
+  Iterator<Vehicle> vIter = vehicles.iterator();
+  //v.seek(new PVector(mouseX, mouseY));
+  while (vIter.hasNext()) {
+    Vehicle v = vIter.next();
+    v.applyFlow(field);
     v.update();
-    v.display();
+    
+    if (v.position.x < 0 || width < v.position.x) {
+      vIter.remove();
+    } else {
+      v.display();
+    }
   }
 }
 
@@ -67,6 +80,7 @@ class Vehicle {
   
   void update() {
     avoidWall();
+    
     velocity.add(acceleration);
     velocity.limit(speedLimit);
     
@@ -75,18 +89,6 @@ class Vehicle {
   }
   
   void avoidWall() {
-    if (position.x < marginX) {
-      PVector desired = new PVector(speedLimit, velocity.y);
-      PVector steer = PVector.sub(desired, velocity);
-      steer.limit(forceLimit);
-      applyForce(steer);
-    } else if (position.x > width - marginX) {
-      PVector desired = new PVector(-speedLimit, velocity.y);
-      PVector steer = PVector.sub(desired, velocity);
-      steer.limit(forceLimit);
-      applyForce(steer);
-    }
-    
     if (position.y < marginY) {
       PVector desired = new PVector(velocity.x, speedLimit);
       PVector steer = PVector.sub(desired, velocity);
@@ -120,6 +122,16 @@ class Vehicle {
     applyForce(steer);
   }
   
+  void applyFlow(FlowField flow) {
+    PVector desired = flow.lookup(position);
+    
+    desired.mult(speedLimit);
+    
+    PVector steer = PVector.sub(desired, velocity);
+    steer.limit(forceLimit);
+    applyForce(steer);
+  }
+  
   void display() {
     float theta = velocity.heading() + PI / 2;
     
@@ -140,5 +152,41 @@ class Vehicle {
     boolean isSameHashCode = this.hashCode() == other.hashCode();
     boolean isSameId = this.getId() == other.getId();
     return isSameHashCode && isSameId;
+  }
+}
+
+class FlowField {
+  PVector[][] field;
+  
+  int cols, rows;
+  int resolution;
+  
+  FlowField(int res) {
+    resolution = res;
+    
+    cols = width / resolution;
+    rows = height / resolution;
+    
+    field = new PVector[cols][rows];
+    init();
+  }
+  
+  void init() {
+    float xoff = 0;
+    for (int x = 0; x < cols; x++) {
+      float yoff = 0;
+      for (int y = 0; y < rows; y++) {
+        float theta = map(noise(xoff, yoff), 0, 1, 0, TWO_PI);
+        field[x][y] = new PVector(cos(theta), sin(theta));
+        yoff += 0.1;
+      }
+      xoff += 0.1;
+    }
+  }
+  
+  PVector lookup(PVector pos) {
+    int col = int(constrain(pos.x / resolution, 0, cols - 1));
+    int row = int(constrain(pos.y / resolution, 0, rows - 1));
+    return field[col][row];
   }
 }
