@@ -6,6 +6,7 @@ void setup() {
   vehicles = new ArrayList<Vehicle>();
   
   path = new Path();
+  path.makePath();
 }
 
 int id;
@@ -112,18 +113,27 @@ class Vehicle {
     predict.mult(25);
     PVector futurePosition = PVector.add(position, predict);
     
-    PVector a = path.start;
-    PVector b = path.end;
-    PVector normalPoint = getNormalPoint(futurePosition, a, b);
+    PVector normal = null;
+    PVector target = null;
+    float nearestDistance = 1000000;
     
-    PVector direction = PVector.sub(b, a);
-    direction.normalize();
-    direction.mult(10);
-    PVector target = PVector.add(normalPoint, direction);
-    
-    float distance = PVector.dist(normalPoint, futurePosition);
-    if (distance > path.radius) {
-      seek(target);
+    for (int i = 0; i < path.curvePoints.size() - 1; i += 1) {
+      PVector a = path.curvePoints.get(i);
+      PVector b = path.curvePoints.get(i + 1);
+      PVector normalPoint = getNormalPoint(futurePosition, a, b);
+      if (normalPoint.x < a.x || normalPoint.x > b.x) {
+        normalPoint = b.copy();
+      }
+      
+      float distance = PVector.dist(futurePosition, normalPoint);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        target = normalPoint.copy();
+      }
+      
+      if (nearestDistance > path.radius) {
+        seek(target);
+      }
     }
   }
   
@@ -167,18 +177,57 @@ class Path {
   
   float radius;
   
+  ArrayList<PVector> curvePoints;
+  
   Path() {
     radius = 20;
     start = new PVector(0, height / 3);
     end = new PVector(width, 2 * height / 3);
+    curvePoints = new ArrayList<PVector>();
+  }
+  
+  void makePath() {
+    addCurvePoint(0, 200);
+    addCurvePoint(200, 320);
+    addCurvePoint(320, 470);
+    addCurvePoint(600, 280);
+  }
+  
+  PVector getStart() {
+    return curvePoints.get(0);
+  }
+  
+  PVector getEnd() {
+    return curvePoints.get(curvePoints.size() - 1);
+  }
+  
+  private void addCurvePoint(float x, float y) {
+    PVector point = new PVector(x, y);
+    curvePoints.add(point);
+  }
+  
+  private void addCurvePoint(PVector point) {
+    PVector curvePoint = point.copy();
+    curvePoints.add(curvePoint);
   }
   
   void display() {
     strokeWeight(radius * 2);
-    stroke(0, 100);
-    line(start.x, start.y, end.x, end.y);
+    stroke(200);
+    noFill();
+    beginShape();
+    for (PVector v : curvePoints) {
+      vertex(v.x, v.y);
+    }
+    endShape();
+    
     strokeWeight(1);
     stroke(0);
-    line(start.x, start.y, end.x, end.y);
+    noFill();
+    beginShape();
+    for (PVector v : curvePoints) {
+      vertex(v.x, v.y);
+    }
+    endShape();
   }
 }
