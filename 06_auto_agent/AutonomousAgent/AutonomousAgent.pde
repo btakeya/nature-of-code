@@ -4,12 +4,13 @@ void setup() {
   
   id = 0;
   vehicles = new ArrayList<Vehicle>();
-  field = new FlowField(10);
+  
+  path = new Path();
 }
 
 int id;
 
-FlowField field;
+Path path;
 
 ArrayList<Vehicle> vehicles;  
 PVector moveX;
@@ -28,17 +29,13 @@ import java.util.*;
 void draw() {
   background(255);
   
-  /* Margin */
-  line(0, marginY, width, marginY);
-  line(0, height - marginY, width, height - marginY);
-  line(marginX, 0, marginX, height);
-  line(width - marginX, 0, width - marginX, height);
+  path.display();
   
   Iterator<Vehicle> vIter = vehicles.iterator();
   //v.seek(new PVector(mouseX, mouseY));
   while (vIter.hasNext()) {
     Vehicle v = vIter.next();
-    v.applyFlow(field);
+    v.follow(path);
     v.update();
     
     if (v.position.x < 0 || width < v.position.x) {
@@ -81,27 +78,11 @@ class Vehicle {
   }
   
   void update() {
-    avoidWall();
-    
     velocity.add(acceleration);
     velocity.limit(speedLimit);
     
     position.add(velocity);
     acceleration.mult(0);
-  }
-  
-  void avoidWall() {
-    if (position.y < marginY) {
-      PVector desired = new PVector(velocity.x, speedLimit);
-      PVector steer = PVector.sub(desired, velocity);
-      steer.limit(forceLimit);
-      applyForce(steer);
-    } else if (position.y > height - marginY) {
-      PVector desired = new PVector(velocity.x, -speedLimit);
-      PVector steer = PVector.sub(desired, velocity);
-      steer.limit(forceLimit);
-      applyForce(steer);
-    }
   }
   
   void applyForce(PVector force) {
@@ -121,17 +102,40 @@ class Vehicle {
     
     PVector steer = PVector.sub(desired, velocity);
     steer.limit(forceLimit);
+    
     applyForce(steer);
   }
   
-  void applyFlow(FlowField flow) {
-    PVector desired = flow.lookup(position);
+  void follow(Path path) {
+    PVector predict = velocity.copy();
+    predict.normalize();
+    predict.mult(25);
+    PVector futurePosition = PVector.add(position, predict);
     
-    desired.mult(speedLimit);
+    PVector a = path.start;
+    PVector b = path.end;
+    PVector normalPoint = getNormalPoint(futurePosition, a, b);
     
-    PVector steer = PVector.sub(desired, velocity);
-    steer.limit(forceLimit);
-    applyForce(steer);
+    PVector direction = PVector.sub(b, a);
+    direction.normalize();
+    direction.mult(10);
+    PVector target = PVector.add(normalPoint, direction);
+    
+    float distance = PVector.dist(normalPoint, futurePosition);
+    if (distance > path.radius) {
+      seek(target);
+    }
+  }
+  
+  PVector getNormalPoint(PVector p, PVector a, PVector b) {
+    PVector ap = PVector.sub(p, a);
+    PVector ab = PVector.sub(b, a);
+    
+    ab.normalize();
+    ab.mult(ap.dot(ab));
+    
+    PVector normalPoint = PVector.add(a, ab);
+    return normalPoint;
   }
   
   void display() {
@@ -157,38 +161,24 @@ class Vehicle {
   }
 }
 
-class FlowField {
-  PVector[][] field;
+class Path {
+  PVector start;
+  PVector end;
   
-  int cols, rows;
-  int resolution;
+  float radius;
   
-  FlowField(int res) {
-    resolution = res;
-    
-    cols = width / resolution;
-    rows = height / resolution;
-    
-    field = new PVector[cols][rows];
-    init();
+  Path() {
+    radius = 20;
+    start = new PVector(0, height / 3);
+    end = new PVector(width, 2 * height / 3);
   }
   
-  void init() {
-    float xoff = 0;
-    for (int x = 0; x < cols; x++) {
-      float yoff = 0;
-      for (int y = 0; y < rows; y++) {
-        float theta = map(noise(xoff, yoff), 0, 1, 0, TWO_PI);
-        field[x][y] = new PVector(cos(theta), sin(theta));
-        yoff += 0.1;
-      }
-      xoff += 0.1;
-    }
-  }
-  
-  PVector lookup(PVector pos) {
-    int col = int(constrain(pos.x / resolution, 0, cols - 1));
-    int row = int(constrain(pos.y / resolution, 0, rows - 1));
-    return field[col][row];
+  void display() {
+    strokeWeight(radius * 2);
+    stroke(0, 100);
+    line(start.x, start.y, end.x, end.y);
+    strokeWeight(1);
+    stroke(0);
+    line(start.x, start.y, end.x, end.y);
   }
 }
