@@ -9,6 +9,8 @@ void setup() {
   path.makePath();
 }
 
+boolean isDebugMode = false;
+
 int id;
 
 Path path;
@@ -121,6 +123,16 @@ class Vehicle {
       PVector a = path.curvePoints.get(i);
       PVector b = path.curvePoints.get(i + 1);
       PVector normalPoint = getNormalPoint(futurePosition, a, b);
+      
+      if (isDebugMode) {
+        fill(100*i, 50*i, 70*i);
+        textSize(50);
+        text(i, normalPoint.x, normalPoint.y);
+        textSize(20);
+        text(_id, normalPoint.x + 20, normalPoint.y);
+        ellipse(normalPoint.x, normalPoint.y, 10, 10);
+      }
+      
       if (normalPoint.x < a.x || normalPoint.x > b.x) {
         normalPoint = b.copy();
       }
@@ -187,10 +199,10 @@ class Path {
   }
   
   void makePath() {
-    addCurvePoint(0, 200);
-    addCurvePoint(200, 320);
-    addCurvePoint(320, 470);
-    addCurvePoint(600, 280);
+    addCurvePoint(-20, height / 2);
+    addCurvePoint(240, 520);
+    addCurvePoint(520, 470);
+    addCurvePoint(width + 20, height / 2);
   }
   
   PVector getStart() {
