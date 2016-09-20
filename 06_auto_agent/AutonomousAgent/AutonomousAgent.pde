@@ -43,6 +43,8 @@ void draw() {
     
     if (v.position.x < 0 || width < v.position.x) {
       vIter.remove();
+    } else if (v.position.y < 0 || height < v.position.y) {
+      vIter.remove();
     } else {
       v.display();
     }
