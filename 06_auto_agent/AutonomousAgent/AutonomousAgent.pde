@@ -38,6 +38,7 @@ void draw() {
   //v.seek(new PVector(mouseX, mouseY));
   while (vIter.hasNext()) {
     Vehicle v = vIter.next();
+    v.separate(vehicles);
     v.follow(path);
     v.update();
     
@@ -158,6 +159,35 @@ class Vehicle {
     
     PVector normalPoint = PVector.add(a, ab);
     return normalPoint;
+  }
+  
+  void separate(ArrayList<Vehicle> vehicles) {
+    int countVehiclesInRange = 0;
+    PVector sum = new PVector();
+    float avoidLimit = 20;
+    
+    for (Vehicle otherVehicle : vehicles) {
+      float distance = PVector.dist(position, otherVehicle.position);
+      
+      if (_id != otherVehicle.getId() &&
+         (0 < distance && distance < avoidLimit)) {
+        PVector approach = PVector.sub(position, otherVehicle.position);
+        approach.normalize();
+        
+        sum.add(approach);
+        countVehiclesInRange += 1;
+      }
+    }
+    
+    if (countVehiclesInRange > 0) {
+      sum.div(countVehiclesInRange);
+      sum.setMag(speedLimit);
+      
+      PVector steer = PVector.sub(sum, velocity);
+      steer.limit(forceLimit);
+      
+      applyForce(steer);
+    }
   }
   
   void display() {
